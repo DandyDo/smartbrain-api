@@ -1,9 +1,13 @@
 const { response } = require('express');
 const express = require('express');
+const bcrypt = require('bcrypt');
 
 const app = express();
-
 app.use(express.json());
+
+const saltRounds = 10;
+const myPlaintextPassword = 's0/\/\P4$$w0rD';
+const someOtherPlaintextPassword = 'not_bacon';
 
 const database = {
     users: [
@@ -11,7 +15,6 @@ const database = {
             id: '123',
             name: 'Ammar',
             email: 'ammar@gmail.com',
-            password: 'cookies',
             entries: 0,
             joined: new Date(),
         },
@@ -19,11 +22,17 @@ const database = {
             id: '124',
             name: 'Nader',
             email: 'nader@gmail.com',
-            password: 'bananas',
             entries: 0,
             joined: new Date(),
         }
-    ]
+    ],
+    login: [
+        {
+            id: '',
+            hash: '',
+            email: '',
+        }
+    ],
 }
 
 app.get('/', (req, res) => {
@@ -32,7 +41,8 @@ app.get('/', (req, res) => {
 
 // Sign In
 app.post('/signin', (req, res) => {
-    if (req.body.email === database.users[0].email && req.body.password == database.users[0].password) {
+    if (req.body.email === database.users[0].email &&
+        req.body.password == database.users[0].password) {
         res.json('sucess');
     } else {
         res.status(400).json('error logging in.')
@@ -41,7 +51,7 @@ app.post('/signin', (req, res) => {
 
 // Register
 app.post('/register', (req, res) => {
-    const { name, email, password} = req.body;
+    const { name, email, password } = req.body;
     database.users.push({
         id: '125',
         name: name,
@@ -90,7 +100,6 @@ app.post('/image', (req, res) => {
         res.status(400).json('User not found.');
     }
 });
-
 
 app.listen(3000, () => {
     console.log('app is running on port 3000');

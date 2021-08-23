@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@mapbox/node-pre-gyp": "^1.0.5",
+    "bcrypt": "^5.0.1",
     "express": "^4.17.1"
   },
   "devDependencies": {
