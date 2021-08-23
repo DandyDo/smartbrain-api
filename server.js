@@ -1,13 +1,13 @@
 const { response } = require('express');
 const express = require('express');
+const cors = require('cors');
 const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const saltRounds = 10;
-const myPlaintextPassword = 's0/\/\P4$$w0rD';
-const someOtherPlaintextPassword = 'not_bacon';
 
 const database = {
     users: [
@@ -15,6 +15,7 @@ const database = {
             id: '123',
             name: 'Ammar',
             email: 'ammar@gmail.com',
+            password: 'cookies',
             entries: 0,
             joined: new Date(),
         },
@@ -22,6 +23,7 @@ const database = {
             id: '124',
             name: 'Nader',
             email: 'nader@gmail.com',
+            password: 'bananas',
             entries: 0,
             joined: new Date(),
         }
@@ -43,7 +45,7 @@ app.get('/', (req, res) => {
 app.post('/signin', (req, res) => {
     if (req.body.email === database.users[0].email &&
         req.body.password == database.users[0].password) {
-        res.json('sucess');
+        res.json('success');
     } else {
         res.status(400).json('error logging in.')
     }
