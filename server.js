@@ -68,9 +68,29 @@ app.get('/profile/:id', (req, res) => {
     });
 
     if(!found) {
-        res.status(404).json('User not found.');
+        res.status(400).json('User not found.');
     }
 });
+
+// Image
+app.post('/image', (req, res) => {
+    const { id } = req.body;
+    let found = false;
+
+    //check if user found in database
+    database.users.forEach(user => {
+        if (user.id === id) {
+            found = true;
+            user.entries++;
+            return res.json(user.entries);
+        }
+    });
+
+    if(!found) {
+        res.status(400).json('User not found.');
+    }
+});
+
 
 app.listen(3000, () => {
     console.log('app is running on port 3000');
