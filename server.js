@@ -65,15 +65,18 @@ app.post('/signin', (req, res) => {
 // Register
 app.post('/register', (req, res) => {
     const { name, email, password } = req.body;
-    database.users.push({
-        id: '125',
-        name: name,
+
+    db('users')
+    .returning('*')
+    .insert({
         email: email,
-        entries: 0,
+        name: name,
         joined: new Date()
-    });
-    
-    res.json(database.users[database.users.length-1]);
+    })
+    .then(user => {
+        res.json(user[0]);
+    })
+    .catch(() => res.status(400).json('Unable to register.'));
 });
 
 // Profile
