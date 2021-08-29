@@ -2,12 +2,23 @@ const { response } = require('express');
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const knex = require('knex');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 const saltRounds = 10;
+
+const db = knex({
+    client: 'pg',
+    connection: {
+      host : 'localhost',
+      user : 'dandydo',
+      password : 'ibtihal21',
+      database : 'smartbrain'
+    }
+});
 
 const database = {
     users: [
