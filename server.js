@@ -3,12 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const knex = require('knex');
+const { reset } = require('nodemon');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-
-const saltRounds = 10;
 
 const db = knex({
     client: 'pg',
@@ -20,64 +19,65 @@ const db = knex({
     }
 });
 
-const database = {
-    users: [
-        {
-            id: '123',
-            name: 'Ammar',
-            email: 'ammar@gmail.com',
-            password: 'cookies',
-            entries: 9,
-            joined: new Date(),
-        },
-        {
-            id: '124',
-            name: 'Nader',
-            email: 'nader@gmail.com',
-            password: 'bananas',
-            entries: 1,
-            joined: new Date(),
-        }
-    ],
-    login: [
-        {
-            id: '',
-            hash: '',
-            email: '',
-        }
-    ],
-}
-
 app.get('/', (req, res) => {
-    res.send(database.users);
+    res.send('Success.'); 
 });
 
 // Sign In
 app.post('/signin', (req, res) => {
-    if (req.body.email === database.users[0].email &&
-        req.body.password == database.users[0].password) {
-        res.json(database.users[0]);
-    } else {
-        res.status(400).json('error logging in.')
-    }
+    db.select('email', 'hash').from('login')
+    .where('email', '=', req.body.email)
+    .then (login => {
+        bcrypt.compare(req.body.password, login[0].hash).then(isValid => {
+            if (isValid) {
+                return db.select('*').from('users')
+                .where('email', '=', req.body.email)
+                .then(user => {
+                    res.json(user[0])
+                })
+                .catch(() => res.status(400).json('Unable to find user.'));
+            }
+            else {
+                res.status(400).json('Wrong credentials.');
+            }
+        });
+    })
+    .catch(() => res.status(400).json('Wrong credentials.'));
 });
 
 // Register
 app.post('/register', (req, res) => {
     const { name, email, password } = req.body;
+    const saltRounds = 10;
 
-    db('users')
-    .returning('*')
-    .insert({
-        email: email,
-        name: name,
-        joined: new Date()
-    })
-    .then(user => {
-        res.json(user[0]);
-    })
-    .catch(() => res.status(400).json('Unable to register.'));
+    bcrypt.hash(password, saltRounds).then(function(hash) {
+        db.transaction(trx => {
+        trx.insert({
+            hash: hash,
+            email: email
+        })
+        .into('login')
+        .returning('email')
+        .then(loginEmail => {
+            return trx('users')
+            .returning('*')
+            .insert({
+                email: loginEmail[0],
+                name: name,
+                joined: new Date()
+            })
+            .then(user => {
+                res.json(user[0]);
+            })
+        })
+        .then(trx.commit)
+        .catch(trx.rollback)
+                        
+        })
+        .catch(() => res.status(400).json('Unable to register.'));  
+    });
 });
+        
 
 // Profile
 app.get('/profile/:id', (req, res) => {
