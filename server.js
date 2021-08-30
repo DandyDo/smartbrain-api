@@ -93,29 +93,19 @@ app.get('/profile/:id', (req, res) => {
 
     })
     .catch(() => res.status(400).json('There was a problem getting the user profile.'));
-
-    // if(!found) {
-    //     
-    // }res.status(400).json('User not found.');
 });
 
 // Image
 app.put('/image', (req, res) => {
     const { id } = req.body;
-    let found = false;
 
-    //check if user found in database
-    database.users.forEach(user => {
-        if (user.id === id) {
-            found = true;
-            user.entries++;
-            return res.json(user.entries);
-        }
-    });
-
-    if(!found) {
-        res.status(400).json('User not found.');
-    }
+    db('users').where('id', '=', id)
+    .increment('entries', 1)
+    .returning('entries')
+    .then(entries => {
+        res.json(entries[0]);
+    })
+    .catch(() => res.status(400).json('Unable to get entries.'));
 });
 
 app.listen(3000, () => {
