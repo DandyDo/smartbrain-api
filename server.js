@@ -1,9 +1,7 @@
-const { response } = require('express');
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const knex = require('knex');
-const { reset } = require('nodemon');
 
 const app = express();
 app.use(express.json());
@@ -13,9 +11,9 @@ const db = knex({
     client: 'pg',
     connection: {
       host : 'localhost',
-      user : 'dandydo',
-      password : 'ibtihal21',
-      database : 'smartbrain'
+      user : 'dandydo', // insert your username
+      password : 'ibtihal21', // insert your db password
+      database : 'smartbrain' // insert your db name
     }
 });
 
