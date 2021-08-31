@@ -1,106 +1,45 @@
-const { response } = require('express');
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const knex = require('knex');
+
+const register = require('./controllers/register');
+const signin = require('./controllers/signin');
+const profile = require('./controllers/profile');
+const image = require('./controllers/image');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const saltRounds = 10;
-
-const database = {
-    users: [
-        {
-            id: '123',
-            name: 'Ammar',
-            email: 'ammar@gmail.com',
-            password: 'cookies',
-            entries: 9,
-            joined: new Date(),
-        },
-        {
-            id: '124',
-            name: 'Nader',
-            email: 'nader@gmail.com',
-            password: 'bananas',
-            entries: 1,
-            joined: new Date(),
-        }
-    ],
-    login: [
-        {
-            id: '',
-            hash: '',
-            email: '',
-        }
-    ],
-}
+const db = knex({
+    client: 'pg',
+    connection: {
+      host : 'localhost',
+      user : 'Your username', // insert your username
+      password : 'Your password', // insert your db password
+      database : 'your db name' // insert your db name
+    }
+});
 
 app.get('/', (req, res) => {
-    res.send(database.users);
+    res.send('Success.'); 
 });
 
 // Sign In
-app.post('/signin', (req, res) => {
-    if (req.body.email === database.users[0].email &&
-        req.body.password == database.users[0].password) {
-        res.json(database.users[0]);
-    } else {
-        res.status(400).json('error logging in.')
-    }
-});
+app.post('/signin', (res, req) => { signin.handleSignin(res, req, db, bcrypt) });
 
 // Register
-app.post('/register', (req, res) => {
-    const { name, email, password } = req.body;
-    database.users.push({
-        id: '125',
-        name: name,
-        email: email,
-        entries: 0,
-        joined: new Date()
-    });
-    
-    res.json(database.users[database.users.length-1]);
-});
+app.post('/register', (req, res) => { register.handleRegister(req, res, db, bcrypt) });   
 
 // Profile
-app.get('/profile/:id', (req, res) => {
-    const { id } = req.params;
-    let found = false;
-
-    //check if user found in database
-    database.users.forEach(user => {
-        if (user.id === id) {
-            found = true;
-            return res.json(user);
-        }
-    });
-
-    if(!found) {
-        res.status(400).json('User not found.');
-    }
-});
+app.get('/profile/:id', (req, res) => { profile.handleProfile(req, res, db) });
 
 // Image
-app.put('/image', (req, res) => {
-    const { id } = req.body;
-    let found = false;
+app.put('/image', (req, res) => { image.handleImage(req, res, db) });
 
-    //check if user found in database
-    database.users.forEach(user => {
-        if (user.id === id) {
-            found = true;
-            user.entries++;
-            return res.json(user.entries);
-        }
-    });
-
-    if(!found) {
-        res.status(400).json('User not found.');
-    }
-});
+// Clarifai API
+app.post('/imageurl', (req, res) => { image.handleAPICall(req, res) });
 
 app.listen(3000, () => {
     console.log('app is running on port 3000');
