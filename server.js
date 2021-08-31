@@ -16,9 +16,9 @@ const db = knex({
     client: 'pg',
     connection: {
       host : 'localhost',
-      user : 'your username', // insert your username
-      password : 'your password', // insert your db password
-      database : 'your database' // insert your db name
+      user : 'Your username', // insert your username
+      password : 'Your password', // insert your db password
+      database : 'your db name' // insert your db name
     }
 });
 
@@ -30,14 +30,16 @@ app.get('/', (req, res) => {
 app.post('/signin', (res, req) => { signin.handleSignin(res, req, db, bcrypt) });
 
 // Register
-app.post('/register', (req, res) => { register.handleRegister(req, res, db, bcrypt) });
-        
+app.post('/register', (req, res) => { register.handleRegister(req, res, db, bcrypt) });   
 
 // Profile
 app.get('/profile/:id', (req, res) => { profile.handleProfile(req, res, db) });
 
 // Image
 app.put('/image', (req, res) => { image.handleImage(req, res, db) });
+
+// Clarifai API
+app.post('/imageurl', (req, res) => { image.handleAPICall(req, res) });
 
 app.listen(3000, () => {
     console.log('app is running on port 3000');

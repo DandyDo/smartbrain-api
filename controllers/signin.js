@@ -1,12 +1,17 @@
 
 const handleSignin = (req, res, db, bcrypt) => {
+    const { name, email, password } = req.body;
+    if (!email || !password) {
+        res.status(400).json('Incorrect credentials.')
+    }
+
     db.select('email', 'hash').from('login')
-    .where('email', '=', req.body.email)
+    .where('email', '=', email)
     .then (login => {
-        bcrypt.compare(req.body.password, login[0].hash).then(isValid => {
+        bcrypt.compare(password, login[0].hash).then(isValid => {
             if (isValid) {
                 return db.select('*').from('users')
-                .where('email', '=', req.body.email)
+                .where('email', '=', email)
                 .then(user => {
                     res.json(user[0])
                 })

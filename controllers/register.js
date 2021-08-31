@@ -3,6 +3,10 @@ const handleRegister = (req, res, db, bcrypt) => {
     const { name, email, password } = req.body;
     const saltRounds = 10;
 
+    if (!email || !name || !password) {
+        res.status(400).json('Incorrect credentials.')
+    }
+
     bcrypt.hash(password, saltRounds)
     .then(function(hash) {
         db.transaction(trx => {
