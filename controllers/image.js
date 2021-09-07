@@ -1,14 +1,13 @@
 const Clarifai = require('clarifai');
-const { json } = require('express');
 
 // Clarifai API (Don't forget to set your API key)
 const app = new Clarifai.App({
-    apiKey: 'Your API Key',
+    apiKey: process.env.CLARIFAI_API,
 });
 
 // Get the response from Clarifai API (Replace 'Model ID' with the FACE_EMBED_MODEL from their github)
 const handleAPICall = (req, res) => {
-    app.models.predict('MODEL ID', req.body.input)
+    app.models.predict('e15d0f873e66047e579f90cf82c9882z', req.body.input)
     .then(data => {
         res.json(data);
     })
