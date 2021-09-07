@@ -16,7 +16,9 @@ const db = knex({
     client: 'pg',
     connection: {
       connectionString: process.env.DATABASE_URL,
-      ssl: true
+      ssl: { // NOT SECURE should be set to true but currently using free version of Heroku
+        rejectUnauthorized: false
+      }
     }
 });
 
